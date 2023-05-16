@@ -5,8 +5,8 @@
  * Author : George Muhn
  */ 
 
-#ifdef F_CPU
-#define F_CPU 160000UL
+#ifndef F_CPU
+#define F_CPU 16000000UL
 #endif
 
 #include <avr/io.h>
