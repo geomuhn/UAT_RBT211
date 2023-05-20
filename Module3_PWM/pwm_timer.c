@@ -59,14 +59,6 @@ int main(void)
 			//OCR1A = brightness;
 			_delay_ms(10);
 		}
-		for (uint8_t i = Max_pwm_value; i > 0 ; i-- )
-		{
-			brightness = i;
-			//OCR2A = brightness;
-			OCR1B = brightness;
-			//OCR1A = brightness;
-			_delay_ms(10);
-		}
 		 
     }
 	return(0);
