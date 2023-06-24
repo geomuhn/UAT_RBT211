@@ -1,81 +1,64 @@
+/*
+This one WORKS! KEEP IT!
+*/
 
-#ifndef F_CPU
 #define F_CPU 16000000UL
-#endif
 
-#include <avr/io.h>                        /* Defines pins, ports, etc */
-#include <util/delay.h>                     /* Functions to waste time */
-#include <avr/interrupt.h>					/* Functions add interrupts */
+#include <avr/io.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
 
-
-
-
+#define MAX_PWM 255
+#define HALF_PWM 127
+#define MIN_PWM 0
+#define QUARTER_PWM 64  // 25% of max brightness
 
 int main(void)
 {
-	//Define any variables here
-	uint8_t brightness;
-	//uint16_t Max_pwm_value;
-	
-	
-	// Decided what timers may be used for Blinking the LED or Dimming LED
-	// HINT one of the 3 timers will be better for blinking the LED
-	
-	// Timer 0 Registers
-	TCCR0A |= ;
-	TCCR0B |= ;
-	TIMSK0 |= ;	
-	OCR0A |= ;
-	OCR0B |= ;
-	
-	// Timer 1 Registers
-	TCCR1A |= ;
-	TCCR1B |= ;
-	TIMSK1 |= ;
-	OCR1A |= ;
-	OCR1B |= ;
-	
-	// Timer 2 Registers
-	TCCR2A |= ;
-	TCCR2A |= ;
-	TIMSK2 |= ;
-	OCR2A |= ;
-	OCR2A |= ;
-	
-	
-	// Set up INPUT AND OUTPUT PINS or PULL UP/DOWN RESISTORS
-	// REMEBER even PWM pins must be set as an output or they will not work.
-	
-	
-	
-	
-	
-	
-	sei(); // Enables Interrupts
+	// Set PD6 (OC0A) and PD5 (OC0B) as outputs
+	DDRD |= (1 << PORTD6);
+	DDRD |= (1 << PORTD5);
 
-    /* Replace with your application code */
-    while (1) 
-    {
+	// Set PB5 to low
+	DDRB |= (1 << PORTB5);
+	PORTB &= ~(1 << PORTB5);
 
-		
-		for (uint8_t i = 0; i <255 ; i++ )
+	// Set Timer0 for Fast PWM mode and normal port operation, clear OC0A/OC0B on compare match
+	TCCR0A = (1 << COM0A1) | (1 << COM0B1) | (1 << WGM01) | (1 << WGM00);
+
+	// Set prescaler to 64 and start the timer
+	TCCR0B = (1 << CS01) | (1 << CS00);
+
+	while (1)
+	{
+		// Fade in PD6 to half brightness
+		for (uint8_t i = MIN_PWM; i < HALF_PWM; i++)
 		{
-		
-			_delay_ms(10);
+			OCR0A = i;  // Set the value for OC0A (PD6) PWM duty cycle
+			_delay_ms(2);
 		}
-		for (/* INSERT CONDITION */)
-		{
-			
-			_delay_ms(10);
-		}
-		 
-    }
-	return(0);
-}
 
-ISR(/* INSERT TIMER INTERUPT TYPE */){
-	
-	// Turn on LED at half brightness
-	
-	
+		// Fade out PD6
+		for (uint8_t i = HALF_PWM; i > MIN_PWM; i--)
+		{
+			OCR0A = i;  // Set the value for OC0A (PD6) PWM duty cycle
+			_delay_ms(2);
+		}
+
+		// Fade in PD5 to full brightness
+		for (uint8_t i = MIN_PWM; i < MAX_PWM; i++)
+		{
+			OCR0B = i;  // Set the value for OC0B (PD5) PWM duty cycle
+			_delay_ms(2);
+		}
+
+		// Fade out PD5
+		for (uint8_t i = MAX_PWM; i > MIN_PWM; i--)
+		{
+			OCR0B = i;  // Set the value for OC0B (PD5) PWM duty cycle
+			_delay_ms(2);
+		}
+	}
+
+	return 0;
 }
